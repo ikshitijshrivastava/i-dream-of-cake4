@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup Guide — I Dream of Cake PWA</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#0d0f14;color:#e8eaf0;padding:20px;max-width:760px;margin:0 auto;}
+h1{font-size:22px;color:#f0a500;margin-bottom:6px;}
+h2{font-size:16px;color:#f0a500;margin:22px 0 8px;border-bottom:1px solid #2a2f3a;padding-bottom:6px;}
+h3{font-size:14px;color:#a78bfa;margin:14px 0 6px;}
+p,li{font-size:13px;color:#7a8099;line-height:1.8;margin-bottom:6px;}
+ul,ol{padding-left:18px;}
+code{background:#1e2229;border:1px solid #2a2f3a;border-radius:5px;padding:2px 7px;font-size:12px;color:#3ecf8e;font-family:monospace;}
+.box{background:#1e2229;border:1px solid #2a2f3a;border-radius:10px;padding:14px;margin-bottom:12px;}
+.box.gold{border-color:rgba(240,165,0,.4);background:rgba(240,165,0,.08);}
+.box.green{border-color:rgba(62,207,142,.4);background:rgba(62,207,142,.08);}
+.box.red{border-color:rgba(240,101,101,.4);background:rgba(240,101,101,.08);}
+.label{font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.gold .label{color:#f0a500;}.green .label{color:#3ecf8e;}.red .label{color:#f06565;}
+pre{background:#0d0f14;border:1px solid #2a2f3a;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#3ecf8e;overflow-x:auto;margin:8px 0;white-space:pre-wrap;}
+</style>
+</head>
+<body>
+<h1>🎂 I Dream of Cake — PWA Setup Guide</h1>
+<p>Follow these steps to make your dashboard a full Android app with login, cloud sync and multi-device support.</p>
+
+<h2>Step 1 — Create a Free Firebase Project</h2>
+<div class="box">
+  <ol>
+    <li>Go to <strong>https://console.firebase.google.com</strong></li>
+    <li>Click <strong>"Add Project"</strong> → Name it <code>i-dream-of-cake</code></li>
+    <li>Disable Google Analytics (not needed) → Click <strong>Create Project</strong></li>
+  </ol>
+</div>
+
+<h2>Step 2 — Enable Authentication</h2>
+<div class="box">
+  <ol>
+    <li>In Firebase Console → Click <strong>Authentication</strong> (left sidebar)</li>
+    <li>Click <strong>"Get Started"</strong></li>
+    <li>Click <strong>"Email/Password"</strong> → Enable it → Save</li>
+  </ol>
+</div>
+
+<h2>Step 3 — Create Firestore Database</h2>
+<div class="box">
+  <ol>
+    <li>In Firebase Console → Click <strong>Firestore Database</strong></li>
+    <li>Click <strong>"Create database"</strong></li>
+    <li>Choose <strong>"Start in production mode"</strong> → Next</li>
+    <li>Select your region (choose <strong>asia-south1</strong> for India) → Done</li>
+  </ol>
+</div>
+
+<h2>Step 4 — Set Security Rules</h2>
+<div class="box">
+  <ol>
+    <li>In Firestore → Click <strong>Rules</strong> tab</li>
+    <li>Replace all content with:</li>
+  </ol>
+<pre>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}</pre>
+  <li>Click <strong>Publish</strong></li>
+</div>
+
+<h2>Step 5 — Get Your App Config</h2>
+<div class="box">
+  <ol>
+    <li>In Firebase Console → Click the ⚙️ gear icon → <strong>Project Settings</strong></li>
+    <li>Scroll down to <strong>"Your apps"</strong> section</li>
+    <li>Click the <strong>&lt;/&gt;</strong> (Web) icon → Register app → name it <code>idoc-web</code></li>
+    <li>Copy the <code>firebaseConfig</code> object shown</li>
+  </ol>
+</div>
+
+<h2>Step 6 — Paste Config into index.html</h2>
+<div class="box gold">
+  <div class="label">Important</div>
+  <p>Open <strong>index.html</strong> in any text editor. Find this section (around line 300):</p>
+<pre>const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};</pre>
+  <p>Replace with the config you copied from Firebase. Save the file.</p>
+</div>
+
+<h2>Step 7 — Host the App (Free)</h2>
+<div class="box green">
+  <div class="label">Option A — Firebase Hosting (Recommended)</div>
+  <ol>
+    <li>Install Node.js from <strong>nodejs.org</strong></li>
+    <li>Open terminal/command prompt in the <code>idoc-pwa</code> folder</li>
+    <li>Run these commands one by one:</li>
+  </ol>
+<pre>npm install -g firebase-tools
+firebase login
+firebase init hosting
+  → Select your project
+  → Public directory: . (just a dot)
+  → Single-page app: Yes
+  → Overwrite index.html: No
+firebase deploy</pre>
+  <p>Your app will be live at <code>https://YOUR-PROJECT-ID.web.app</code></p>
+</div>
+
+<div class="box">
+  <div class="label">Option B — Netlify (Even Simpler)</div>
+  <ol>
+    <li>Go to <strong>https://netlify.com</strong> → Sign up free</li>
+    <li>Drag and drop the entire <strong>idoc-pwa</strong> folder onto the Netlify dashboard</li>
+    <li>Your app goes live instantly with a URL like <code>https://random-name.netlify.app</code></li>
+  </ol>
+</div>
+
+<h2>Step 8 — Install as Android App</h2>
+<div class="box">
+  <ol>
+    <li>Open the hosted URL in <strong>Chrome</strong> on your Lenovo P12 or Samsung S24 Ultra</li>
+    <li>Chrome will show a banner: <strong>"Add to Home Screen"</strong> — tap it</li>
+    <li>Or tap the 3-dot menu → <strong>"Add to Home Screen"</strong> → <strong>"Install"</strong></li>
+    <li>The app icon appears on your home screen — it opens like a native app!</li>
+    <li>Do the same on your second device — they share the same data automatically</li>
+  </ol>
+</div>
+
+<h2>How Multi-Device Sync Works</h2>
+<div class="box green">
+  <div class="label">Real-time, Progressive</div>
+  <ul>
+    <li>Every order is saved to Firebase cloud the moment you tap "Save Order"</li>
+    <li>The other device sees the new order <strong>within seconds</strong> automatically</li>
+    <li><strong>Progressive updates</strong> — only changed orders are synced, existing ones are never overwritten</li>
+    <li>If you're offline, data saves locally and syncs when connection returns</li>
+    <li>Each user account has completely separate data</li>
+  </ul>
+</div>
+
+<h2>Files in this package</h2>
+<div class="box">
+  <ul>
+    <li><code>index.html</code> — Main app (edit Firebase config here)</li>
+    <li><code>sw.js</code> — Service Worker (offline support)</li>
+    <li><code>manifest.json</code> — PWA manifest (app name, icons)</li>
+    <li><code>SETUP.html</code> — This guide</li>
+  </ul>
+</div>
+
+<div class="box red" style="margin-top:20px;">
+  <div class="label">Firebase Free Tier Limits</div>
+  <p>Firebase Spark (free) plan includes: 1GB storage, 50,000 reads/day, 20,000 writes/day, 1GB bandwidth. For a cake order business this is more than enough — you'd need thousands of orders per day to exceed limits.</p>
+</div>
+</body>
+</html>
